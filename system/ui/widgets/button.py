@@ -4,6 +4,7 @@ from enum import IntEnum
 import pyray as rl
 
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos
+from openpilot.system.ui.lib.accent_theme import themed
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.label import Label
 from openpilot.common.filter_simple import FirstOrderFilter
@@ -29,7 +30,7 @@ ACTION_BUTTON_FONT_SIZE = 48
 
 BUTTON_TEXT_COLOR = {
   ButtonStyle.NORMAL: rl.Color(228, 228, 228, 255),
-  ButtonStyle.PRIMARY: rl.Color(228, 228, 228, 255),
+  ButtonStyle.PRIMARY: themed(228, 228, 228, mazda=(18, 18, 20)),
   ButtonStyle.DANGER: rl.Color(228, 228, 228, 255),
   ButtonStyle.TRANSPARENT: rl.BLACK,
   ButtonStyle.TRANSPARENT_WHITE_TEXT: rl.WHITE,
@@ -47,7 +48,7 @@ BUTTON_DISABLED_TEXT_COLORS = {
 
 BUTTON_BACKGROUND_COLORS = {
   ButtonStyle.NORMAL: rl.Color(51, 51, 51, 255),
-  ButtonStyle.PRIMARY: rl.Color(139, 92, 246, 255),
+  ButtonStyle.PRIMARY: themed(139, 92, 246),
   ButtonStyle.DANGER: rl.Color(226, 44, 44, 255),
   ButtonStyle.TRANSPARENT: rl.BLACK,
   ButtonStyle.TRANSPARENT_WHITE_TEXT: rl.BLANK,
@@ -61,7 +62,7 @@ BUTTON_BACKGROUND_COLORS = {
 
 BUTTON_PRESSED_BACKGROUND_COLORS = {
   ButtonStyle.NORMAL: rl.Color(74, 74, 74, 255),
-  ButtonStyle.PRIMARY: rl.Color(120, 78, 220, 255),
+  ButtonStyle.PRIMARY: themed(120, 78, 220),
   ButtonStyle.DANGER: rl.Color(255, 36, 36, 255),
   ButtonStyle.TRANSPARENT: rl.BLACK,
   ButtonStyle.TRANSPARENT_WHITE_TEXT: rl.BLANK,

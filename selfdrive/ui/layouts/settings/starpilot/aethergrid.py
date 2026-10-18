@@ -6,6 +6,7 @@ import time
 import pyray as rl
 from collections.abc import Callable
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos, MouseEvent, FONT_SCALE
+from openpilot.system.ui.lib.accent_theme import themed
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.scroll_panel2 import GuiScrollPanel2
 from openpilot.system.ui.lib.text_measure import measure_text_cached
@@ -261,11 +262,11 @@ class AetherListColors:
   ROW_BORDER = rl.Color(255, 255, 255, 0)
   ROW_SEPARATOR = rl.Color(255, 255, 255, 16)
   ROW_HOVER = rl.Color(255, 255, 255, 8)
-  CURRENT_BG = rl.Color(139, 92, 246, 18)
-  CURRENT_BORDER = rl.Color(139, 92, 246, 44)
+  CURRENT_BG = themed(139, 92, 246, 18)
+  CURRENT_BORDER = themed(139, 92, 246, 44)
   ACTION_BG = rl.Color(255, 255, 255, 0)
   ACTION_SEPARATOR = rl.Color(255, 255, 255, 18)
-  PRIMARY = hex_to_color("#8B5CF6")
+  PRIMARY = themed(139, 92, 246)
   PRIMARY_SOFT = rl.Color(89, 116, 151, 48)
   DANGER = rl.Color(173, 78, 90, 255)
   DANGER_SOFT = rl.Color(173, 78, 90, 44)
@@ -3677,7 +3678,7 @@ class AetherCategoryDrawer(AetherSettingsView):
   """Reusable nested drawer view that maps SettingRows to a slide-out vertical settings list."""
 
   def __init__(self, controller, title: str, rows: list[SettingRow],
-               *, color: rl.Color | str = "#8B5CF6", subtitle: str = "",
+               *, color: rl.Color | str = AetherListColors.PRIMARY, subtitle: str = "",
                panel_style=None):
     # Group the rows in a single SettingSection with an empty title
     sections = [SettingSection(title="", rows=rows)]
@@ -4693,7 +4694,7 @@ class AetherSliderDialog(Widget):
     presets: list[float] | None = None,
     unit: str = "",
     labels: dict[float, str] | None = None,
-    color: rl.Color | str = "#8B5CF6",
+    color: rl.Color | str = AetherListColors.PRIMARY,
     on_change: Callable[[float], None] | None = None,
   ):
     super().__init__()
@@ -5034,7 +5035,7 @@ class AetherMultiSelectDialog(Widget):
     options: dict[str, str],
     current_values: list[str],
     on_close: Callable,
-    color: rl.Color | str = "#8B5CF6",
+    color: rl.Color | str = AetherListColors.PRIMARY,
   ):
     super().__init__()
     self.title = title

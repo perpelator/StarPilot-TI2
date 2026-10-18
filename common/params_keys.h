@@ -490,6 +490,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"LowVoltageShutdown", {PERSISTENT, FLOAT, "11.8", "11.8", 3, SETTINGS_SIMPLE}},
     {"MainCruiseButtonControl", {PERSISTENT, INT, "0", "0", 2, SETTINGS_SIMPLE}},
     {"ManualUpdateInitiated", {CLEAR_ON_MANAGER_START, BOOL, "0", "0"}},
+    {"MazdaTheme", {PERSISTENT, BOOL, "0", "0", 0, SETTINGS_SIMPLE}},
     {"AMapKey1", {PERSISTENT | DONT_LOG, STRING, "", "", 0}},
     {"AMapKey2", {PERSISTENT | DONT_LOG, STRING, "", "", 0}},
     {"ApiCache_NavDestinations", {PERSISTENT, JSON, "[]", "[]"}},

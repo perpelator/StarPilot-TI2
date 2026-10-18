@@ -11,6 +11,7 @@ from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.ui.lib.prime_state import PrimeState
 from openpilot.selfdrive.ui.lib.ui_param_cache import shared_ui_params
+from openpilot.system.ui.lib.accent_theme import MAZDA_THEME_PARAM, mazda_theme_enabled, set_mazda_theme
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.starpilot.common.lateral_only_experimental import lateral_only_experimental_available
 from openpilot.starpilot.common.car_params_capability import capability_car_params_bytes
@@ -222,6 +223,9 @@ class UIState:
     self.usbgpu_compiled = params.get_bool("UsbGpuCompiled")
     self.usbgpu_active = params.get_bool("UsbGpuActive")
     self.usbgpu_loading = params.get_bool("UsbGpuLoading")
+    mazda_theme = params.get_bool(MAZDA_THEME_PARAM)
+    if mazda_theme != mazda_theme_enabled():
+      set_mazda_theme(mazda_theme)
     self.switchback_mode_enabled = self.params_memory.get_bool("SwitchbackModeEnabled") if self.started else False
     self.conditional_status = self.params_memory.get_int("CEStatus", default=0) if self.started else 0
     mark_progress("ui.update.after_state_params")

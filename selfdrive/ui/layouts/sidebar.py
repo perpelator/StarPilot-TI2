@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from collections.abc import Callable
 from cereal import log
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.system.ui.lib.accent_theme import mazda_theme_enabled
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos, FONT_SCALE
 from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.lib.text_measure import measure_text_cached
@@ -75,6 +76,7 @@ class Sidebar(Widget):
 
     self._home_img = gui_app.texture("images/button_home.png", HOME_BTN.width, HOME_BTN.height)
     self._flag_img = gui_app.texture("images/button_flag.png", HOME_BTN.width, HOME_BTN.height)
+    self._mazda_home_img = gui_app.texture_fit("images/MazdaLogo.png", HOME_BTN.width, HOME_BTN.height)
     self._settings_img = gui_app.texture("images/button_settings.png", SETTINGS_BTN.width, SETTINGS_BTN.height)
     self._mic_img = gui_app.texture("icons/microphone.png", 30, 30)
     self._mic_indicator_rect = rl.Rectangle(0, 0, 0, 0)
@@ -166,10 +168,16 @@ class Sidebar(Widget):
 
     # Home/Flag button
     flag_pressed = mouse_down and rl.check_collision_point_rec(mouse_pos, HOME_BTN)
-    button_img = self._flag_img if ui_state.started else self._home_img
+    if ui_state.started:
+      button_img = self._flag_img
+    else:
+      button_img = self._mazda_home_img if mazda_theme_enabled() else self._home_img
 
     tint = Colors.BUTTON_PRESSED if (ui_state.started and flag_pressed) else Colors.BUTTON_NORMAL
-    rl.draw_texture(button_img, int(HOME_BTN.x), int(HOME_BTN.y), tint)
+    # Center within the button so non-square images (e.g. the Mazda logo) keep their aspect ratio
+    img_x = HOME_BTN.x + (HOME_BTN.width - button_img.width) / 2
+    img_y = HOME_BTN.y + (HOME_BTN.height - button_img.height) / 2
+    rl.draw_texture(button_img, int(img_x), int(img_y), tint)
 
     # Microphone button
     if self._recording_audio:

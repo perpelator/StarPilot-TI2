@@ -38,6 +38,9 @@ from openpilot.starpilot.common.starpilot_variables import (
 BOOT_LOGO_JPEG_PATH = Path("/usr/comma/bg.jpg")
 BOOT_LOGO_PNG_PATH = Path("/usr/comma/bg.png")
 BOOT_LOGO_MAGIC_PATH = Path("/usr/comma/magic.py")
+MAZDA_BOOT_LOGO_PATH = Path(BASEDIR) / "selfdrive/assets/images/MazdaLogo.png"
+BOOT_LOGO_SIZE = (2160, 1080)
+MAZDA_BOOT_LOGO_HEIGHT_FRACTION = 0.45
 
 
 def seed_desktop_theme_assets():
@@ -111,7 +114,7 @@ def install_starpilot(build_metadata, params):
 
   register_device(build_metadata, params)
 
-  update_boot_logo(starpilot=True, selected_logo=params.get("BootLogo"))
+  update_boot_logo(starpilot=True, selected_logo=params.get("BootLogo"), mazda_theme=params.get_bool("MazdaTheme"))
 
 def register_device(build_metadata, params):
   def register_thread():
@@ -157,11 +160,25 @@ def uninstall_starpilot():
   HARDWARE.uninstall()
 
 
-def update_boot_logo(starpilot=False, stock=False, selected_logo=None):
+def _compose_mazda_boot_logo(logo_path):
+  from PIL import Image
+
+  canvas = Image.new("RGB", BOOT_LOGO_SIZE, (0, 0, 0))
+  with Image.open(logo_path) as logo:
+    logo = logo.convert("RGBA")
+    scale = min(BOOT_LOGO_SIZE[1] * MAZDA_BOOT_LOGO_HEIGHT_FRACTION / logo.height, BOOT_LOGO_SIZE[0] * 0.8 / logo.width)
+    logo = logo.resize((round(logo.width * scale), round(logo.height * scale)), Image.LANCZOS)
+    canvas.paste(logo, ((BOOT_LOGO_SIZE[0] - logo.width) // 2, (BOOT_LOGO_SIZE[1] - logo.height) // 2), logo)
+  return canvas
+
+
+def update_boot_logo(starpilot=False, stock=False, selected_logo=None, mazda_theme=False):
   if HARDWARE.get_device_type() == "pc":
     return
 
-  if starpilot:
+  if starpilot and mazda_theme:
+    target_logo = MAZDA_BOOT_LOGO_PATH
+  elif starpilot:
     target_logo = Path(BASEDIR) / "starpilot/assets/other_images/starpilot_boot_logo.jpg"
     if selected_logo:
       selected = selected_logo.decode("utf-8", "ignore") if isinstance(selected_logo, (bytes, bytearray)) else str(selected_logo)
@@ -188,23 +205,26 @@ def update_boot_logo(starpilot=False, stock=False, selected_logo=None):
       staged_jpeg = staging_path / "bg.jpg"
       staged_png = staging_path / "bg.png"
 
-      with Image.open(target_logo) as img:
-        normalized_logo = img.convert("RGB")
-        if normalized_logo.width >= normalized_logo.height:
-          landscape_logo = normalized_logo
-          weston_logo = normalized_logo.transpose(Image.Transpose.ROTATE_270)
-        else:
-          weston_logo = normalized_logo
-          landscape_logo = normalized_logo.transpose(Image.Transpose.ROTATE_90)
+      if target_logo == MAZDA_BOOT_LOGO_PATH:
+        normalized_logo = _compose_mazda_boot_logo(target_logo)
+      else:
+        with Image.open(target_logo) as img:
+          normalized_logo = img.convert("RGB")
+      if normalized_logo.width >= normalized_logo.height:
+        landscape_logo = normalized_logo
+        weston_logo = normalized_logo.transpose(Image.Transpose.ROTATE_270)
+      else:
+        weston_logo = normalized_logo
+        landscape_logo = normalized_logo.transpose(Image.Transpose.ROTATE_90)
 
-        magic_uses_jpeg = False
-        try:
-          magic_uses_jpeg = BOOT_LOGO_JPEG_PATH.as_posix() in BOOT_LOGO_MAGIC_PATH.read_text()
-        except OSError:
-          pass
+      magic_uses_jpeg = False
+      try:
+        magic_uses_jpeg = BOOT_LOGO_JPEG_PATH.as_posix() in BOOT_LOGO_MAGIC_PATH.read_text()
+      except OSError:
+        pass
 
-        (landscape_logo if magic_uses_jpeg else weston_logo).save(staged_jpeg, format="JPEG", quality=95)
-        landscape_logo.save(staged_png, format="PNG")
+      (landscape_logo if magic_uses_jpeg else weston_logo).save(staged_jpeg, format="JPEG", quality=95)
+      landscape_logo.save(staged_png, format="PNG")
 
       logo_variants = [(staged_jpeg, BOOT_LOGO_JPEG_PATH)]
       if BOOT_LOGO_PNG_PATH.is_file():

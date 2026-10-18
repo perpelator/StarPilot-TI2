@@ -28,6 +28,7 @@ from openpilot.starpilot.assets.model_manager import (
 from openpilot.starpilot.common.starpilot_variables import MODELS_PATH, update_starpilot_toggles
 from openpilot.system.ui.lib.application import FONT_SCALE, FontWeight, MouseEvent, MousePos, gui_app
 from openpilot.system.ui.lib.multilang import tr
+from openpilot.system.ui.lib.accent_theme import themed_alpha
 from openpilot.system.ui.lib.scroll_panel2 import GuiScrollPanel2
 from openpilot.system.ui.widgets import DialogResult, Widget
 from openpilot.system.ui.widgets.confirm_dialog import ConfirmDialog, alert_dialog
@@ -140,7 +141,7 @@ class DrivingModelManagerView(AetherInteractiveMixin, Widget):
         enabled=lambda: self._controller.primary_header_button_state()[1],
         emphasized=True,
         font_size=SETTINGS_ROW_TITLE_FONT_SIZE,
-        accent_color=with_alpha(AetherListColors.PRIMARY, 92),
+        accent_color=themed_alpha(AetherListColors.PRIMARY, 92),
       )
     )
     self._secondary_header_button = self._child(

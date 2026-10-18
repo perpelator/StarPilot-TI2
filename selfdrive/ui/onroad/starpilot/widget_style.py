@@ -2,6 +2,7 @@
 
 import pyray as rl
 
+from openpilot.system.ui.lib.accent_theme import themed
 
 # The two left-hand control cards share a visible frame.  Keeping these values
 # here prevents the Set Speed and SLC implementations from drifting apart.
@@ -15,7 +16,7 @@ CONTROL_SEGMENTS = 10
 CONTROL_BORDER_WIDTH = 6
 CONTROL_BG = rl.Color(0, 0, 0, 166)
 CONTROL_BORDER = rl.Color(196, 205, 208, 180)
-UNIFIED_ACCENT = rl.Color(160, 96, 230, 230)
+UNIFIED_ACCENT = themed(160, 96, 230, 230)
 # The layout manager has historically anchored the left controls at x + 146.
 # Keep that placement stable while making the width explicit and shared.
 WIDGET_ANCHOR_OFFSET = 146

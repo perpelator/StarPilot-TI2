@@ -9,6 +9,7 @@ from openpilot.selfdrive.ui.layouts.settings.starpilot.aethergrid import draw_te
 from openpilot.selfdrive.ui.layouts.settings.software import SoftwareLayout
 from openpilot.selfdrive.ui.layouts.settings.toggles import TogglesLayout
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos
+from openpilot.system.ui.lib.accent_theme import themed
 from openpilot.system.ui.lib.bluetooth_manager import BluetoothManager
 from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.lib.text_measure import measure_text_cached
@@ -29,7 +30,10 @@ COLLAPSED_TAB_WIDTH = 64
 
 # Colors
 SIDEBAR_COLOR = rl.BLACK
-ACCENT_LINE_COLOR = rl.Color(139, 92, 246, 55)
+ACCENT_LINE_COLOR = themed(139, 92, 246, 55)
+TAB_ACCENT_COLOR = themed(139, 92, 246, 255)
+TAB_BG_COLOR = themed(139, 92, 246, 60)
+TAB_BG_PRESSED_COLOR = themed(139, 92, 246, 120)
 PANEL_COLOR = rl.BLACK
 CLOSE_BTN_COLOR = rl.Color(41, 41, 41, 255)
 CLOSE_BTN_PRESSED = rl.Color(59, 59, 59, 255)
@@ -182,8 +186,8 @@ class SettingsLayout(Widget):
         is_pressed = self._swipe_start is not None
 
     # Tab Colors and Styling
-    accent = rl.Color(139, 92, 246, 255)
-    tab_bg = rl.Color(139, 92, 246, 120 if is_pressed else 60)
+    accent = TAB_ACCENT_COLOR
+    tab_bg = TAB_BG_PRESSED_COLOR if is_pressed else TAB_BG_COLOR
     tab_border = rl.Color(accent.r, accent.g, accent.b, 255 if is_pressed else 160)
 
     # Faint outer glow behind the tab

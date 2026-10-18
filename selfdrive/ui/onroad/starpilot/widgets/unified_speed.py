@@ -20,6 +20,7 @@ from openpilot.selfdrive.ui.onroad.starpilot.widget_style import (
 )
 from openpilot.selfdrive.ui.onroad.starpilot.widgets.base import LayoutWidget
 from openpilot.system.ui.lib.application import gui_app, FontWeight, FONT_SCALE
+from openpilot.system.ui.lib.accent_theme import themed_alpha
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 
@@ -42,7 +43,7 @@ PAUSE_ICON_GAP = 8
 OFFSET_FONT_SIZE = 22
 INLINE_OFFSET_FONT_SIZE = 28
 CONFIRMATION_COLOR = rl.Color(188, 132, 255, 255)
-PAUSE_COLOR = rl.Color(UNIFIED_ACCENT.r, UNIFIED_ACCENT.g, UNIFIED_ACCENT.b, 255)
+PAUSE_COLOR = themed_alpha(UNIFIED_ACCENT, 255)
 
 
 def _digit_metrics(font: rl.Font) -> tuple[float, float]:

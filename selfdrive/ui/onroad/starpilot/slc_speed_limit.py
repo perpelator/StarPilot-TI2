@@ -7,6 +7,7 @@ from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.selfdrive.ui.onroad.starpilot.widget_style import UNIFIED_ACCENT
+from openpilot.system.ui.lib.accent_theme import themed_alpha
 from openpilot.selfdrive.ui.onroad.starpilot.source_bubble_layout import (
   enabled_source_titles, fit_source_label, source_abbreviated_value_text,
   source_value_text, visible_source_rows,
@@ -168,7 +169,7 @@ def _get_semi_bold():
 _SOURCE_PANEL_PAD_X = 16
 _SOURCE_PANEL_PAD_Y = 12
 _SOURCE_PANEL_BG = rl.Color(0, 0, 0, 175)
-_SOURCE_DIVIDER = rl.Color(UNIFIED_ACCENT.r, UNIFIED_ACCENT.g, UNIFIED_ACCENT.b, 90)
+_SOURCE_DIVIDER = themed_alpha(UNIFIED_ACCENT, 90)
 _SOURCE_LABEL_MUTED = rl.Color(170, 179, 174, 255)
 _SOURCE_LABEL_SIZE = 26
 _SOURCE_VALUE_SIZE = 28

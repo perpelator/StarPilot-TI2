@@ -872,6 +872,15 @@ class GuiApplication:
     self._textures[cache_key] = texture_obj
     return texture_obj
 
+  def texture_fit(self, asset_path: str, max_width: float, max_height: float) -> rl.Texture:
+    """Load a texture scaled to fit inside max_width x max_height, keeping the image's own aspect ratio."""
+    with as_file(ASSETS_DIR.joinpath(asset_path)) as fspath:
+      image = rl.load_image(fspath.as_posix())
+    src_width, src_height = image.width, image.height
+    rl.unload_image(image)
+    scale = min(max_width / src_width, max_height / src_height)
+    return self.texture(asset_path, max(1, round(src_width * scale)), max(1, round(src_height * scale)))
+
   def cached_render_texture(self, cache_key: str, width: int, height: int,
                             render: Callable[[], None]) -> object | None:
     """Return a cached texture, scheduling cache misses between frames.

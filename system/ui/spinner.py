@@ -4,6 +4,7 @@ import pyray as rl
 import select
 import sys
 
+from openpilot.system.ui.lib.accent_theme import load_theme_from_params, mazda_theme_enabled
 from openpilot.system.ui.lib.application import FontWeight, gui_app
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.text import wrap_text
@@ -53,6 +54,9 @@ PROGRESS_LABEL_SPACING = 12
 DARKGRAY = (55, 55, 55, 255)
 
 
+MAZDA_LOGO_RING_FRACTION = 0.55
+
+
 def clamp(value, min_value, max_value):
   return max(min(value, max_value), min_value)
 
@@ -61,7 +65,13 @@ class Spinner(Widget):
   def __init__(self):
     super().__init__()
     self._theme = BIG_THEME if gui_app.big_ui() else SMALL_THEME
-    self._comma_texture = gui_app.texture("images/spinner_comma.png", self._theme.texture_size, self._theme.texture_size)
+    load_theme_from_params()
+    if mazda_theme_enabled():
+      # Fit the Mazda logo inside the spinner track ring
+      logo_size = self._theme.texture_size * MAZDA_LOGO_RING_FRACTION
+      self._comma_texture = gui_app.texture_fit("images/MazdaLogo.png", logo_size, logo_size)
+    else:
+      self._comma_texture = gui_app.texture("images/spinner_comma.png", self._theme.texture_size, self._theme.texture_size)
     self._spinner_texture = gui_app.texture("images/spinner_track.png", self._theme.texture_size, self._theme.texture_size, alpha_premultiply=True)
     self._rotation = 0.0
     self._progress: int | None = None
@@ -106,7 +116,7 @@ class Spinner(Widget):
 
   def _draw_spinner(self, center_x: float, center_y: float) -> None:
     spinner_origin = rl.Vector2(self._theme.texture_size / 2.0, self._theme.texture_size / 2.0)
-    comma_position = rl.Vector2(center_x - self._theme.texture_size / 2.0, center_y - self._theme.texture_size / 2.0)
+    comma_position = rl.Vector2(center_x - self._comma_texture.width / 2.0, center_y - self._comma_texture.height / 2.0)
 
     rl.draw_texture_pro(
       self._spinner_texture,

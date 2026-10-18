@@ -22,6 +22,15 @@ from openpilot.starpilot.common.favorite_slots import (
   toggle_favorite_slot,
   unassign_favorite_slot,
 )
+from openpilot.system.ui.lib.accent_theme import mazda_theme_enabled, themed, tint
+
+
+def _purple() -> tuple[int, int, int]:
+  return tint(161, 112, 255)
+
+
+def _purple_light() -> tuple[int, int, int]:
+  return tint(214, 192, 255)
 
 
 class FavoriteRadialMenu:
@@ -57,11 +66,10 @@ class FavoriteRadialMenu:
   CORNER_HINT_EDGE_MARGIN = 6.0
   _ELLIPSIS = "..."
 
-  _PURPLE = (161, 112, 255)
   _PANEL = rl.Color(13, 11, 23, 236)
-  _PANEL_BORDER = rl.Color(214, 192, 255, 166)
+  _PANEL_BORDER = themed(214, 192, 255, 166)
   _TEXT = rl.Color(255, 255, 255, 245)
-  _MUTED_TEXT = rl.Color(213, 202, 232, 216)
+  _MUTED_TEXT = themed(213, 202, 232, 216)
   _PICKER_SECTION_LABELS = {
     "Visual (Display & UI)": "Display & UI",
     "Longitudinal (Speed & Following)": "Speed & Following",
@@ -718,7 +726,7 @@ class FavoriteRadialMenu:
       r = int(172 - 84 * w)
       g = int(125 - 75 * w)
       b = int(255 - 97 * w)
-    return rl.Color(r, g, b, alpha)
+    return rl.Color(*tint(r, g, b), alpha)
 
   def _draw_corner_hint(self) -> None:
     scale = self._scale_for(self._rect)
@@ -733,8 +741,9 @@ class FavoriteRadialMenu:
     texture = None
     if cache is not None:
       variant = "pressed" if is_pressed else "idle"
+      theme = "mazda" if mazda_theme_enabled() else "stock"
       texture = cache(
-        f"favorite-corner-hint:{texture_size}:{variant}",
+        f"favorite-corner-hint:{texture_size}:{variant}:{theme}",
         texture_size,
         texture_size,
         lambda: FavoriteRadialMenu._draw_corner_hint_geometry(
@@ -845,7 +854,7 @@ class FavoriteRadialMenu:
   def _draw_radial_menu(self) -> None:
     scale = self._scale_for(self._rect)
     origin = self.corner_center(self._rect)
-    purple = self._PURPLE
+    purple = _purple()
 
     rail_r = 460.0 * scale
     rail_start_rl = 289.0
@@ -860,7 +869,7 @@ class FavoriteRadialMenu:
                  rail_start_rl, rail_end_rl, segments, rl.Color(*purple, 58))
     # Crisp core rail
     rl.draw_ring(origin, rail_r - 1.8 * scale, rail_r + 1.8 * scale,
-                 rail_start_rl, rail_end_rl, segments, rl.Color(214, 192, 255, 140))
+                 rail_start_rl, rail_end_rl, segments, rl.Color(*_purple_light(), 140))
 
     # 2. Orbital switch blade and node complication rendering
     for index, _hit_box, center, node_r, _deg, blade_rect in self._slot_rects:
@@ -881,13 +890,13 @@ class FavoriteRadialMenu:
       # opaque so bright path pixels cannot read as gaps at curved ends.
       if configured:
         rl.draw_rectangle_rounded(draw_rect, 0.45, 14, rl.Color(14, 10, 26, 255))
-        border_col = rl.Color(214, 192, 255, 230) if is_pressed else rl.Color(161, 112, 255, 140)
+        border_col = rl.Color(*_purple_light(), 230) if is_pressed else rl.Color(*_purple(), 140)
         border_width = max(1, int(round(1.8 * scale)))
         rl.draw_rectangle_rounded_lines_ex(draw_rect, 0.45, 14, border_width, border_col)
       else:
         rl.draw_rectangle_rounded(draw_rect, 0.45, 14, rl.Color(12, 10, 22, 255))
         border_width = max(1, int(round(1.4 * scale)))
-        rl.draw_rectangle_rounded_lines_ex(draw_rect, 0.45, 14, border_width, rl.Color(161, 112, 255, 80))
+        rl.draw_rectangle_rounded_lines_ex(draw_rect, 0.45, 14, border_width, rl.Color(*_purple(), 80))
 
       # 2. Left Complication Hub Disc
       rl.draw_circle_v(center, node_r + 12.0 * scale, rl.Color(*purple, 22 if configured else 12))
@@ -918,19 +927,19 @@ class FavoriteRadialMenu:
           start_deg = k * (seg_span + seg_gap) - 90.0
           end_deg = start_deg + seg_span
           if k == active_idx:
-            rl.draw_ring(center, node_r - 4.5 * scale, node_r, start_deg, end_deg, 20, rl.Color(214, 192, 255, 255))
-            rl.draw_ring(center, node_r - 5.5 * scale, node_r - 0.5 * scale, start_deg, end_deg, 20, rl.Color(161, 112, 255, 180))
+            rl.draw_ring(center, node_r - 4.5 * scale, node_r, start_deg, end_deg, 20, rl.Color(*_purple_light(), 255))
+            rl.draw_ring(center, node_r - 5.5 * scale, node_r - 0.5 * scale, start_deg, end_deg, 20, rl.Color(*_purple(), 180))
           else:
             rl.draw_ring(center, node_r - 2.5 * scale, node_r - 0.5 * scale, start_deg, end_deg, 20, rl.Color(68, 44, 112, 140))
       elif is_toggle and is_on:
         # Glowing illuminated rim when toggle is active
-        rl.draw_ring(center, node_r - 4.5 * scale, node_r, 0.0, 360.0, 40, rl.Color(214, 192, 255, 255))
-        rl.draw_ring(center, node_r - 5.5 * scale, node_r - 0.5 * scale, 0.0, 360.0, 40, rl.Color(161, 112, 255, 180))
+        rl.draw_ring(center, node_r - 4.5 * scale, node_r, 0.0, 360.0, 40, rl.Color(*_purple_light(), 255))
+        rl.draw_ring(center, node_r - 5.5 * scale, node_r - 0.5 * scale, 0.0, 360.0, 40, rl.Color(*_purple(), 180))
         rl.draw_ring(center, node_r - 3.5 * scale, node_r - 0.5 * scale, 220.0, 320.0, 20, rl.Color(255, 255, 255, 120))
       elif is_toggle and not is_on:
         # Resting muted rim when toggle is inactive
         rl.draw_ring(center, node_r - 2.5 * scale, node_r - 0.5 * scale, 0.0, 360.0, 40, rl.Color(68, 44, 112, 140))
-        rl.draw_ring(center, node_r - 3.0 * scale, node_r, 0.0, 360.0, 40, rl.Color(161, 112, 255, 55))
+        rl.draw_ring(center, node_r - 3.0 * scale, node_r, 0.0, 360.0, 40, rl.Color(*_purple(), 55))
       else:
         rl.draw_ring(center, node_r - 3.0 * scale, node_r, 0.0, 360.0, 40, accent)
         rl.draw_ring(center, node_r - 3.5 * scale, node_r - 0.5 * scale, 220.0, 320.0, 20, rl.Color(255, 255, 255, 75))
@@ -955,7 +964,7 @@ class FavoriteRadialMenu:
           self._draw_text(self._font(bold=True), fitted_title, rl.Vector2(text_x, center.y - 24.0 * scale), fs_title, self._TEXT)
 
           dim_val = self._measure_text(self._font(bold=False), active_label, fs_sub)
-          self._draw_text(self._font(bold=False), active_label, rl.Vector2(text_x, center.y + 8.0 * scale), fs_sub, rl.Color(214, 192, 255, 240))
+          self._draw_text(self._font(bold=False), active_label, rl.Vector2(text_x, center.y + 8.0 * scale), fs_sub, rl.Color(*_purple_light(), 240))
 
           # Hardware Capsule Pips
           pip_w = 14.0 * scale
@@ -965,9 +974,9 @@ class FavoriteRadialMenu:
           for p in range(total_opts):
             pip_rect = rl.Rectangle(pip_start_x + p * (pip_w + pip_gap), center.y + 8.0 * scale + (dim_val.y - pip_h) / 2.0, pip_w, pip_h)
             if p == active_idx:
-              rl.draw_rectangle_rounded(pip_rect, 0.4, 6, rl.Color(214, 192, 255, 255))
+              rl.draw_rectangle_rounded(pip_rect, 0.4, 6, rl.Color(*_purple_light(), 255))
             else:
-              rl.draw_rectangle_rounded(pip_rect, 0.4, 6, rl.Color(161, 112, 255, 75))
+              rl.draw_rectangle_rounded(pip_rect, 0.4, 6, rl.Color(*_purple(), 75))
         elif is_toggle:
           raw_label = str(slot.get("label") or slot.get("key") or "Favorite").replace('\\"', '"')
           fs_title = int(32 * scale)
@@ -976,7 +985,7 @@ class FavoriteRadialMenu:
           self._draw_text(self._font(bold=True), fitted_title, rl.Vector2(text_x, center.y - 24.0 * scale), fs_title, self._TEXT)
 
           status_text = "ON" if is_on else "OFF"
-          status_color = rl.Color(214, 192, 255, 255) if is_on else rl.Color(213, 202, 232, 160)
+          status_color = rl.Color(*_purple_light(), 255) if is_on else rl.Color(213, 202, 232, 160)
           self._draw_text(self._font(bold=True), status_text, rl.Vector2(text_x, center.y + 8.0 * scale), fs_sub, status_color)
         else:
           raw_label = str(slot.get("label") or slot.get("key") or "Favorite").replace('\\"', '"')
@@ -1001,7 +1010,7 @@ class FavoriteRadialMenu:
               total_h = dim1.y + dim2.y + 2.0 * scale
               start_y = center.y - total_h / 2.0
               self._draw_text(self._font(bold=True), fitted_l1, rl.Vector2(text_x, start_y), fs_l1, self._TEXT)
-              self._draw_text(self._font(bold=False), fitted_l2, rl.Vector2(text_x, start_y + dim1.y + 2.0 * scale), fs_l2, rl.Color(214, 192, 255, 230))
+              self._draw_text(self._font(bold=False), fitted_l2, rl.Vector2(text_x, start_y + dim1.y + 2.0 * scale), fs_l2, rl.Color(*_purple_light(), 230))
       else:
         fs_title = int(32 * scale)
         fs_sub = int(24 * scale)
@@ -1012,7 +1021,7 @@ class FavoriteRadialMenu:
         total_h = dim_t.y + dim_s.y + 2.0 * scale
         start_y = center.y - total_h / 2.0
         self._draw_text(self._font(bold=True), title_text, rl.Vector2(text_x, start_y), fs_title, self._TEXT)
-        self._draw_text(self._font(bold=False), sub_text, rl.Vector2(text_x, start_y + dim_t.y + 2.0 * scale), fs_sub, rl.Color(214, 192, 255, 230))
+        self._draw_text(self._font(bold=False), sub_text, rl.Vector2(text_x, start_y + dim_t.y + 2.0 * scale), fs_sub, rl.Color(*_purple_light(), 230))
 
       # Wave flash animation
       if self._flash_slot == index:
@@ -1024,7 +1033,7 @@ class FavoriteRadialMenu:
           flash_a = int(180.0 * (1.0 - ease))
           flash_a = max(0, min(255, flash_a))
           if flash_a > 0 and ease > 0.01:
-            rl.draw_ring(center, node_r, node_r + 24.0 * scale * ease, 0.0, 360.0, 32, rl.Color(214, 192, 255, flash_a))
+            rl.draw_ring(center, node_r, node_r + 24.0 * scale * ease, 0.0, 360.0, 32, rl.Color(*_purple_light(), flash_a))
         else:
           self._flash_slot = None
 
@@ -1050,7 +1059,7 @@ class FavoriteRadialMenu:
       self._drawer_rect.width + 24 * scale,
       self._drawer_rect.height + 24 * scale,
     )
-    rl.draw_rectangle_rounded(glow_rect, self._roundness(glow_rect, 44 * scale), 16, rl.Color(*self._PURPLE, 28))
+    rl.draw_rectangle_rounded(glow_rect, self._roundness(glow_rect, 44 * scale), 16, rl.Color(*_purple(), 28))
     rl.draw_rectangle_rounded(self._drawer_rect, self._roundness(self._drawer_rect, 34 * scale), 16, self._PANEL)
     rl.draw_rectangle_rounded_lines_ex(self._drawer_rect, self._roundness(self._drawer_rect, 34 * scale), 16,
                                        2 * scale, self._PANEL_BORDER)
@@ -1099,7 +1108,7 @@ class FavoriteRadialMenu:
 
   def _draw_option_card(self, rect: rl.Rectangle, option: dict[str, Any], scale: float, *, pressed: bool = False) -> None:
     card_fill = rl.Color(43, 34, 62, 250) if pressed else rl.Color(27, 23, 40, 246)
-    card_border = rl.Color(214, 192, 255, 220) if pressed else rl.Color(*self._PURPLE, 116)
+    card_border = rl.Color(*_purple_light(), 220) if pressed else rl.Color(*_purple(), 116)
     rl.draw_rectangle_rounded(rect, self._roundness(rect, 22 * scale), 12, card_fill)
     rl.draw_rectangle_rounded_lines_ex(rect, self._roundness(rect, 22 * scale), 12, 1.5 * scale,
                                        card_border)
@@ -1129,8 +1138,8 @@ class FavoriteRadialMenu:
     badge_rect = rl.Rectangle(badge_x, badge_y, badge_w, badge_h)
 
     badge_fill = rl.Color(68, 44, 112, 180) if (is_act or is_drop) else rl.Color(42, 28, 70, 180)
-    badge_border = rl.Color(214, 192, 255, 140) if (is_act or is_drop) else rl.Color(161, 112, 255, 100)
-    badge_text_col = rl.Color(214, 192, 255, 230) if (is_act or is_drop) else rl.Color(200, 172, 255, 200)
+    badge_border = rl.Color(*_purple_light(), 140) if (is_act or is_drop) else rl.Color(*_purple(), 100)
+    badge_text_col = rl.Color(*_purple_light(), 230) if (is_act or is_drop) else rl.Color(200, 172, 255, 200)
 
     rl.draw_rectangle_rounded(badge_rect, 0.45, 6, badge_fill)
     rl.draw_rectangle_rounded_lines_ex(badge_rect, 0.45, 6, 1.2 * scale, badge_border)
@@ -1201,7 +1210,7 @@ class FavoriteRadialMenu:
     fill = rl.Color(94, 64, 148, 238) if pressed and enabled else (
       rl.Color(68, 44, 112, 225) if enabled else rl.Color(255, 255, 255, 14)
     )
-    border = rl.Color(*self._PURPLE, 220 if pressed and enabled else (180 if enabled else 42))
+    border = rl.Color(*_purple(), 220 if pressed and enabled else (180 if enabled else 42))
     text_color = self._TEXT if enabled else rl.Color(255, 255, 255, 88)
     rl.draw_rectangle_rounded(rect, self._roundness(rect, 20 * scale), 10, fill)
     rl.draw_rectangle_rounded_lines_ex(rect, self._roundness(rect, 20 * scale), 10, 1.8 * scale, border)

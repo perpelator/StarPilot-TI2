@@ -11,6 +11,7 @@ import pyray as rl
 from openpilot.common.constants import CV
 from openpilot.common.params import Params
 from openpilot.system.ui.lib.application import FontWeight, gui_app
+from openpilot.system.ui.lib.accent_theme import themed
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 
@@ -24,7 +25,7 @@ CARD_BORDER = rl.Color(67, 57, 86, 255)
 TEXT_COLOR = rl.Color(250, 248, 255, 255)
 MUTED_COLOR = rl.Color(190, 186, 207, 255)
 TRACK_COLOR = rl.Color(49, 51, 65, 255)
-PURPLE = rl.Color(139, 108, 197, 255)
+PURPLE = themed(139, 108, 197)
 TEAL = rl.Color(94, 200, 200, 255)
 GREEN = rl.Color(108, 197, 110, 255)
 

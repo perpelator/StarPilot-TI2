@@ -3,6 +3,7 @@ from openpilot.common.time_helpers import system_time_valid
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.selfdrive.ui.widgets.pairing_dialog import PairingDialog
 from openpilot.system.ui.lib.application import gui_app, FontWeight, FONT_SCALE
+from openpilot.system.ui.lib.accent_theme import mazda_theme_enabled
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.wrap_text import wrap_text
 from openpilot.system.ui.widgets import Widget
@@ -18,14 +19,16 @@ class StarPilotLogoWidget(Widget):
   def __init__(self):
     super().__init__()
     self._logo_texture = gui_app.texture("images/StarPilotLogo.png", LOGO_WIDTH, LOGO_HEIGHT)
+    self._mazda_logo_texture = gui_app.texture_fit("images/MazdaLogo.png", LOGO_WIDTH, LOGO_HEIGHT)
 
   def _render(self, rect: rl.Rectangle):
-    scale = min(1.0, rect.width / self._logo_texture.width, rect.height / self._logo_texture.height)
-    width = self._logo_texture.width * scale
-    height = self._logo_texture.height * scale
+    texture = self._mazda_logo_texture if mazda_theme_enabled() else self._logo_texture
+    scale = min(1.0, rect.width / texture.width, rect.height / texture.height)
+    width = texture.width * scale
+    height = texture.height * scale
     x = rect.x + (rect.width - width) / 2
     y = rect.y + (rect.height - height) / 2
-    rl.draw_texture_ex(self._logo_texture, rl.Vector2(x, y), 0.0, scale, rl.WHITE)
+    rl.draw_texture_ex(texture, rl.Vector2(x, y), 0.0, scale, rl.WHITE)
 
 
 class SetupWidget(Widget):

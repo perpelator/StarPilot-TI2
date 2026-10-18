@@ -3,6 +3,7 @@ import re
 import threading
 
 from openpilot.common.params import Params
+from openpilot.system.ui.lib.accent_theme import MAZDA_THEME_PARAM, set_mazda_theme
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.widgets import DialogResult
@@ -127,6 +128,12 @@ class AppearanceManagerView(CardHubManagerView):
                 "icon": "sound",
                 "on_click": lambda: self._controller._navigate_to("dev"),
             },
+            {
+                "title": tr("Theme"),
+                "desc": tr("Swap the StarPilot purple and logo for a classic Mazda look."),
+                "icon": "aicar",
+                "on_click": lambda: self._controller._navigate_to("theme"),
+            },
         ]
 
 
@@ -159,6 +166,22 @@ class StarPilotAppearanceLayout(_SettingsPage):
                 color=PANEL_STYLE.accent,
             )
         )
+
+    def _set_mazda_theme(self, enabled):
+        self._params.put_bool(MAZDA_THEME_PARAM, enabled)
+        set_mazda_theme(enabled)
+        # Rewrite the boot splash now so the very next boot shows the matching logo (no-op on PC)
+        selected_logo = self._params.get("BootLogo")
+        threading.Thread(target=self._update_boot_logo, args=(selected_logo, enabled), daemon=True).start()
+
+    @staticmethod
+    def _update_boot_logo(selected_logo, mazda_theme):
+        # Imported lazily: starpilot_functions pulls in device-only modules the UI doesn't otherwise need
+        try:
+            from openpilot.starpilot.common.starpilot_functions import update_boot_logo
+        except ImportError:
+            return  # desktop host builds lack those modules, and there's no boot splash to update anyway
+        update_boot_logo(starpilot=True, selected_logo=selected_logo, mazda_theme=mazda_theme)
 
     def _set_developer_sidebar(self, enabled):
         self._params.put_bool("DeveloperSidebar", enabled)
@@ -482,6 +505,14 @@ class StarPilotAppearanceLayout(_SettingsPage):
                        visible=dev_sidebar_on),
         ]
 
+        # ═══ 7. Theme ═══
+        self._theme_rows = [
+            SettingRow(MAZDA_THEME_PARAM, "toggle", tr_noop("Mazda Theme"),
+                       subtitle=tr_noop("Replace the purple accents with white and show the Mazda logo on the home screen."),
+                       get_state=lambda: self._params.get_bool(MAZDA_THEME_PARAM),
+                       set_state=self._set_mazda_theme),
+        ]
+
         self._dev_sidebar_rows = [
             SettingRow(
                 f"DeveloperSidebarMetric{i}",
@@ -554,6 +585,13 @@ class StarPilotAppearanceLayout(_SettingsPage):
             [SettingSection(title="", rows=self._dev_rows)],
             header_title=tr_noop("Advanced Metrics"),
             header_subtitle=tr_noop("Adjust radar plots, lead vehicle info, and stop sign metrics."),
+            panel_style=PANEL_STYLE,
+        )
+        self._sub_panels["theme"] = AetherSettingsView(
+            self,
+            [SettingSection(title="", rows=self._theme_rows)],
+            header_title=tr_noop("Theme"),
+            header_subtitle=tr_noop("Swap the StarPilot purple and logo for a classic Mazda look."),
             panel_style=PANEL_STYLE,
         )
         self._sub_panels["dev_sidebar"] = AetherSettingsView(

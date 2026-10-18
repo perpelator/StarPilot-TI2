@@ -70,11 +70,10 @@ class MazdaSafetyFlags(IntFlag):
 @dataclass
 class MazdaPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'mazda_2017'})
+
   def init(self):
     if self.flags & MazdaSafetyFlags.GEN2:
       self.dbc_dict = {Bus.pt: 'mazda_2019'}
-    elif self.flags & MazdaSafetyFlags.GEN1 and self.flags & MazdaSafetyFlags.RADAR_INTERCEPTOR:
-      self.dbc_dict = {Bus.pt: 'mazda_2017', Bus.radar: 'mazda_radar'}
     elif self.flags & MazdaSafetyFlags.GEN3:
       self.dbc_dict = {Bus.pt: 'mazda_2023'}
 
@@ -116,12 +115,12 @@ class CAR(Platforms):
     flags=MazdaSafetyFlags.GEN1,
   )
   MAZDA_3_2019 = MazdaPlatformConfig(
-    [MazdaCarDocs("Mazda 3 2019-24")],
+    [MazdaCarDocs("Mazda 3 2019-23")],
     MazdaCarSpecs(mass=3300 * CV.LB_TO_KG, wheelbase=2.725, steerRatio=15.59, centerToFrontRatio=0.38),
     flags=MazdaSafetyFlags.GEN2,
   )
   MAZDA_CX_30 = MazdaPlatformConfig(
-    [MazdaCarDocs("Mazda CX-30 2019-24")],
+    [MazdaCarDocs("Mazda CX-30 2019-22")],
     MazdaCarSpecs(mass=3375 * CV.LB_TO_KG, wheelbase=2.814, steerRatio=15.5, centerToFrontRatio=0.38),
     flags=MazdaSafetyFlags.GEN2,
   )
@@ -136,7 +135,7 @@ class CAR(Platforms):
     flags=MazdaSafetyFlags.GEN3,
   )
   MAZDA_CX_30_2023 = MazdaPlatformConfig(
-    [MazdaCarDocs("Mazda CX-30 23-26")],
+    [MazdaCarDocs("Mazda CX-30 2023-26")],
     MazdaCarSpecs(mass=3375 * CV.LB_TO_KG, wheelbase=2.814, steerRatio=15.5, centerToFrontRatio=0.38),
     flags=MazdaSafetyFlags.GEN3,
   )
@@ -177,7 +176,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
-      whitelist_ecus=[Ecu.eps, Ecu.abs, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.shiftByWire],
+      whitelist_ecus=[Ecu.eps, Ecu.abs, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.transmission],
     )
   ],
 )

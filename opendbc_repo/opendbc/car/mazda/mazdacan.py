@@ -25,12 +25,12 @@ def create_steering_control(packer, CP, frame, apply_torque, lkas, ti_apply_torq
       tmp = steering_angle + 2048
       ahi = tmp >> 10
       amd = (tmp & 0x3FF) >> 2
-      amd = (amd >> 4) | (( amd & 0xF) << 4)
+      amd = (amd >> 4) | ((amd & 0xF) << 4)
       alo = (tmp & 0x3) << 2
 
       ctr = frame % 16
       # bytes:     [    1  ] [ 2 ] [             3               ]  [           4         ]
-      csum = 249 - ctr - hi - lo - (lnv << 3) - er1 - (ldw << 7) - ( er2 << 4) - (b1 << 5)
+      csum = 249 - ctr - hi - lo - (lnv << 3) - er1 - (ldw << 7) - (er2 << 4) - (b1 << 5)
 
       # bytes      [ 5 ] [ 6 ] [    7   ]
       csum = csum - ahi - amd - alo - b2
@@ -50,7 +50,7 @@ def create_steering_control(packer, CP, frame, apply_torque, lkas, ti_apply_torq
         "LKAS_REQUEST": apply_torque,
         "CTR": ctr,
         "ERR_BIT_1": er1,
-        "LINE_NOT_VISIBLE" : lnv,
+        "LINE_NOT_VISIBLE": lnv,
         "LDW": ldw,
         "BIT_1": b1,
         "ERR_BIT_2": er2,
@@ -62,13 +62,13 @@ def create_steering_control(packer, CP, frame, apply_torque, lkas, ti_apply_torq
 
     if ti_apply_torque is not None:
       values = {
-          "LKAS_REQUEST"     : ti_apply_torque,
-          "CHKSUM"           : ti_apply_torque,
-          "KEY"              : 3294744160
+          "LKAS_REQUEST": ti_apply_torque,
+          "CHKSUM": ti_apply_torque,
+          "KEY": 3294744160
       }
       msgs.append(packer.make_can_msg("CAM_LKAS2", 1, values))
 
-  elif CP.flags & (MazdaSafetyFlags.GEN2 | MazdaSafetyFlags.GEN3) :
+  elif CP.flags & (MazdaSafetyFlags.GEN2 | MazdaSafetyFlags.GEN3):
     bus = 1
     sig_name = "EPS_LKAS"
     values = {
@@ -188,18 +188,18 @@ def create_radar_command(packer, frame, active, CS, hold):
       addr_name = f"RADAR_{addr}"
       msg = CS.cp_cam.vl[addr_name]
       values = {
-        "MSGS_1" : static_data_list[i][0],
-        "MSGS_2" : static_data_list[i][1],
-        "CTR"    : int(msg["CTR"]) #frame % 16
+        "MSGS_1": static_data_list[i][0],
+        "MSGS_2": static_data_list[i][1],
+        "CTR": int(msg["CTR"]) #frame % 16
       }
       if addr == 361:
         values.update({
-          "INVERSE_SPEED" : int(CS.out.vEgo * -4.4),
-          "BIT" : 1,
+          "INVERSE_SPEED": int(CS.out.vEgo * -4.4),
+          "BIT": 1,
         })
       if addr == 362:
         values.update({
-          "CLIPPED_STEER_ANGLE" : int(clip(steer_angle, 0, 4092)),
+          "CLIPPED_STEER_ANGLE": int(clip(steer_angle, 0, 4092)),
         })
       ret.append(packer.make_can_msg(addr_name, 0, values))
 

@@ -1073,6 +1073,9 @@ class SafetyTest(SafetyTestBase):
               continue
             if attr.startswith('TestToyota') and current_test.startswith('TestToyota'):
               continue
+            # Mazda generations and interceptor variants share one safety mode with different TX_MSGS
+            if attr.startswith('TestMazda') and current_test.startswith('TestMazda'):
+              continue
             if attr.startswith('TestSubaruGen') and current_test.startswith('TestSubaruGen'):
               continue
             if attr.startswith('TestSubaruDPlatform') and current_test.startswith('TestSubaruDPlatform'):
@@ -1164,6 +1167,9 @@ class SafetyTest(SafetyTestBase):
                                                                       'TestHyundaiLegacyLongitudinalSafetyHEV'):
               # exceptions for common msgs across different Hyundai CAN platforms
               tx = list(filter(lambda m: m[0] not in [0x420, 0x50A, 0x389, 0x4A2], tx))
+            if attr.startswith('TestMazda'):
+              # radar interceptor spoofs radar messages that share addresses with other brands
+              tx = list(filter(lambda m: m[0] not in [0x21b, 0x21c, 0x361, 0x362, 0x363, 0x364, 0x365, 0x366, 0x499], tx))
             all_tx.append([[m[0], m[1], attr] for m in tx])
 
     # make sure we got all the msgs
@@ -1176,6 +1182,9 @@ class SafetyTest(SafetyTestBase):
         # TODO: this should be blocked
         nissan_tests = ["TestNissanSafety", "TestNissanSafetyAltEpsBus", "TestNissanLeafSafety", "TestNissanLeafLongSafety"]
         if current_test in nissan_tests and [addr, bus] in self.TX_MSGS:
+          continue
+        # the Mazda radar interceptor intentionally sends radar messages that share addresses with other brands
+        if current_test.startswith('TestMazda') and [addr, bus] in self.TX_MSGS:
           continue
         self.assertFalse(self._tx(msg), f"transmit of {addr=:#x} {bus=} from {test_name} during {current_test} was allowed")
 

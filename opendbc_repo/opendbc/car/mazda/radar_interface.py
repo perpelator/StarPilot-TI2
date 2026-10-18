@@ -2,18 +2,23 @@
 import math
 
 from opendbc.can.parser import CANParser
-from opendbc.car import Bus, structs
+from opendbc.car import structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.mazda.values import DBC, MazdaSafetyFlags
+from opendbc.car.mazda.values import MazdaSafetyFlags
+
+RADAR_DBC = 'mazda_radar'
+RADAR_ADDRS = range(361, 367)
+
 
 def get_radar_can_parser(CP):
-  if Bus.radar not in DBC[CP.carFingerprint]:
-    return None
+  # The radar interceptor is a runtime option (param), so the radar DBC is selected here
+  # from the CarParams flag instead of being part of the static per-platform DBC map.
   if not CP.flags & MazdaSafetyFlags.RADAR_INTERCEPTOR:
     return None
 
-  messages = [(f"RADAR_TRACK_{addr}", 10) for addr in range(361,367)]
-  return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 2)
+  messages = [(f"RADAR_TRACK_{addr}", 10) for addr in RADAR_ADDRS]
+  return CANParser(RADAR_DBC, messages, 2)
+
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
@@ -27,7 +32,7 @@ class RadarInterface(RadarInterfaceBase):
   def update(self, can_strings):
     if self.radar_off_can or (self.rcp is None):
       return super().update(None)
-    vls = self.rcp.update_strings(can_strings)
+    vls = self.rcp.update(can_strings)
     self.updated_messages.update(vls)
     rr = self._update(self.updated_messages)
     self.updated_messages.clear()
@@ -42,7 +47,7 @@ class RadarInterface(RadarInterfaceBase):
     if not self.rcp.can_valid:
       errors.append("canError")
     ret.errors = errors
-    for addr in range(361,367):
+    for addr in RADAR_ADDRS:
       msg = self.rcp.vl[f"RADAR_TRACK_{addr}"]
       if addr not in self.pts:
         self.pts[addr] = structs.RadarData.RadarPoint()

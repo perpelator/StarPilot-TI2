@@ -27,8 +27,7 @@ class CarController(CarControllerBase):
     self.long_active_last = False
     self.params = Params()
     self.params_memory = Params("/dev/shm/params")
-
-
+    self.blended_acc = self.params.get_bool("BlendedACC")  # read once, not every control cycle
 
   def update(self, CC, CS, now_nanos, starpilot_toggles):
     can_sends = []
@@ -87,7 +86,7 @@ class CarController(CarControllerBase):
           op_acc = CC.actuators.accel * 1150
           op_acc = max(-1000, min(op_acc, 1000))
 
-          if self.params.get_bool("BlendedACC"):
+          if self.blended_acc:
             if CC.longActive:
               if not self.long_active_last:
                 self.acc_filter.initialized = False
@@ -109,7 +108,7 @@ class CarController(CarControllerBase):
         stock_acc = CS.acc["ACCEL_CMD"]
         op_acc = (CC.actuators.accel * 200) + 2000
 
-        if self.params.get_bool("BlendedACC"):
+        if self.blended_acc:
           if CC.longActive:
             if not self.long_active_last:
               self.acc_filter.initialized = False
@@ -133,10 +132,12 @@ class CarController(CarControllerBase):
         when coming to a stop.
         """
         if CS.out.standstill: # if we're stopped
-          if not ((self.frame - self.hold_delay_frame) < 50): # and we have been stopped for more than hold_delay duration. This prevents a hard brake if we aren't fully stopped.
+          # and we have been stopped for more than hold_delay duration. This prevents a hard brake if we aren't fully stopped.
+          if not ((self.frame - self.hold_delay_frame) < 50):
+            # if we are resuming or overriding, we want to release the brake
             if ((CC.cruiseControl.resume and CC.actuators.longControlState != LongCtrlState.stopping) or
                 CC.cruiseControl.override or CS.out.gasPressed or
-                (CC.actuators.longControlState == LongCtrlState.starting) or CS.acc["RESUME"]): # if we are resuming or overriding, we want to release the brake
+                (CC.actuators.longControlState == LongCtrlState.starting) or CS.acc["RESUME"]):
               self.resume_timer_frame = self.frame # reset the resume timer so its active
             else: # otherwise we're holding
               hold = (self.frame - self.hold_timer_frame) < 600 # hold for 6s. This allows the electric brake to hold the car.
@@ -147,7 +148,6 @@ class CarController(CarControllerBase):
 
         resume = (self.frame - self.resume_timer_frame) < 50 # stay on for 0.5s to release the brake. This allows the car to move.
         can_sends.append(mazdacan.create_acc_cmd(self.packer, CS.acc, hold, resume))
-
 
     # send steering command
     can_sends.extend(mazdacan.create_steering_control(

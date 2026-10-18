@@ -7,7 +7,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LateralAccelFromTorqueCallbackType
 from opendbc.car.mazda.carcontroller import CarController
 from opendbc.car.mazda.carstate import CarState
-from opendbc.car.mazda.values import CAR, LKAS_LIMITS, MazdaSafetyFlags, MazdaSafetyFlags, GEN1, GEN2, GEN3
+from opendbc.car.mazda.values import CAR, LKAS_LIMITS, MazdaSafetyFlags, GEN1, GEN2, GEN3
 from openpilot.common.params import Params
 
 NON_LINEAR_TORQUE_PARAMS = {
@@ -21,8 +21,7 @@ class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
 
-  def get_lataccel_torque_siglin(self) -> float:
-
+  def get_lataccel_torque_siglin(self) -> tuple[list[float], np.ndarray]:
     def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
       # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
       # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
@@ -37,7 +36,6 @@ class CarInterface(CarInterfaceBase):
 
     lataccel_values = np.arange(-8.0, 8.0, 0.01)
     torque_values = [torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
-    print(torque_values)
     assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
     return torque_values, lataccel_values
 
@@ -60,7 +58,6 @@ class CarInterface(CarInterfaceBase):
       return lateral_accel_from_torque_siglin
     else:
       return self.lateral_accel_from_torque_linear
-
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
@@ -134,7 +131,5 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[0].safetyParam |= MazdaSafetyFlags.GEN3.value
       ret.alphaLongitudinalAvailable = False
       ret.openpilotLongitudinalControl = False
-      if p.get_bool("ManualTransmission"):
-        ret.flags |= MazdaSafetyFlags.MANUAL_TRANSMISSION.value
       ret.enableBsm = False
     return ret

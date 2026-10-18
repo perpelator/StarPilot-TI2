@@ -121,6 +121,7 @@ class LongControl:
     self.experimental_mode_last = False
     self.params = Params()
     self.params_memory = Params("/dev/shm/params")
+    self.blended_acc = self.params.get_bool("BlendedACC")  # read once, not every control cycle
     self.pid = PIDController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                              (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
                              rate=1 / DT_CTRL)
@@ -263,7 +264,7 @@ class LongControl:
                                                        CS.cruiseState.standstill, starpilot_toggles,
                                                        allow_stopping_release=allow_stopping_release)
 
-    if self.params.get_bool("BlendedACC"):
+    if self.blended_acc:
       experimental_mode = self.params_memory.get_int("CEStatus") # 0 means experimental mode is off
       if experimental_mode and not self.experimental_mode_last:
         self.reset()

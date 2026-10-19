@@ -440,6 +440,11 @@ export SP_SKIP_DM_TINYGRAD_PKL="\${SP_SKIP_DM_TINYGRAD_PKL:-1}"
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/opt/tici-sysroot/usr/local/lib:/opt/tici-sysroot/usr/lib/aarch64-linux-gnu:/opt/tici-sysroot/lib/aarch64-linux-gnu:/system/vendor/lib64:\${LD_LIBRARY_PATH:-}
 export TMPDIR=/tmp
 export HOME=/tmp
+# HOME=/tmp hides the image's ~/.gitconfig safe.directory entry, and bind mounts (e.g. uv's git
+# checkouts under /work/.cache) can report a different owner, so trust all paths in this container.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0=safe.directory
+export GIT_CONFIG_VALUE_0='*'
 export PARAMS_ROOT=/tmp/params
 mkdir -p "\${UV_CACHE_DIR}"
 mkdir -p "\${PARAMS_ROOT}"
@@ -588,6 +593,11 @@ export SP_BUILD_WARP_ARTIFACTS="\${SP_BUILD_WARP_ARTIFACTS:-0}"
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/opt/tici-sysroot/usr/local/lib:/opt/tici-sysroot/usr/lib/aarch64-linux-gnu:/opt/tici-sysroot/lib/aarch64-linux-gnu:/system/vendor/lib64:\${LD_LIBRARY_PATH:-}
 export TMPDIR=/tmp
 export HOME=/tmp
+# HOME=/tmp hides the image's ~/.gitconfig safe.directory entry, and bind mounts (e.g. uv's git
+# checkouts under /work/.cache) can report a different owner, so trust all paths in this container.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0=safe.directory
+export GIT_CONFIG_VALUE_0='*'
 export PARAMS_ROOT=/tmp/params
 mkdir -p "\${UV_CACHE_DIR}"
 mkdir -p "\${PARAMS_ROOT}"
